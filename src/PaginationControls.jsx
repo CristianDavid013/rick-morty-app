@@ -1,11 +1,11 @@
 import react from 'react';
-function PaginationControls({ onPrevious, onNext, onFilter, categories }) {
+function PaginationControls({ onPrevPage, onNextPage, onFilter, categories }) {
     return(
         <div style={controlsStyle}>
             <button 
                 onClick={onPrevious}
                 style={buttonStyle}  
-                disbled={ isLoading || !hasPrev }
+                disabled = { isLoading || !hasPrev }
             >Anterior</button>
             <span style={ { margin: '0 15px', fontSize: '1.1em', fontWeight: 'bold' } }>
                 página {totalPages}
@@ -14,7 +14,7 @@ function PaginationControls({ onPrevious, onNext, onFilter, categories }) {
             <button 
                 onClick={onNext} 
                 style={buttonStyle}
-                disbled={ isLoading || !hasNext }>Siguiente</button>
+                disabled={ isLoading || !hasNext }>Siguiente</button>
             <div style={{ marginLeft: '20px' }}>
                 <label htmlFor="filterCategory">Filtrar por Categoría: </label>
                 <select id="filterCategory" onChange={(e) => onFilter(e.target.value)}>
@@ -75,3 +75,5 @@ backgroundColor: '#cccccc',
 cursor: 'not-allowed',
 
 };
+
+export default PaginationControls;

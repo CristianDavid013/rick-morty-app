@@ -1,4 +1,6 @@
 import './App.css'
+import RickAndMortyCharacters from './RickAndMortyCharacters';
+
 
 function App() {
 

@@ -4,7 +4,7 @@ function CharacterCard({ character }) {
         <>
             <div style={cardStyle}>
                 <img src={character.image} alt={character.name} style={imageStyle} />
-                <h3 style>{margin= '10px 0'}</h3>
+                <h3 style={{ margin: '10px 0' }}>{character.name}</h3>
                 <p>Especie: {character.species}</p>
                 <p>Estado: {character.status}</p>
             </div>
@@ -51,3 +51,5 @@ borderRadius: '4px',
 marginBottom: '10px',
 
 };
+
+export default CharacterCard;
