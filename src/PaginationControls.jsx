@@ -1,25 +1,33 @@
-import react from 'react';
-function PaginationControls({ onPrevPage, onNextPage, onFilter, categories }) {
+import React from 'react';
+function PaginationControls({ onPrevPage, 
+  onNextPage, 
+  onFilter, 
+  categories = [],
+  isLoading, 
+  hasPrev, 
+  hasNext, 
+  currentPage, 
+  totalPages  }) {
     return(
         <div style={controlsStyle}>
             <button 
-                onClick={onPrevious}
+                onClick={onPrevPage}
                 style={buttonStyle}  
-                disabled = { isLoading || !hasPrev }
+                disabled={isLoading || !hasPrev}
             >Anterior</button>
             <span style={ { margin: '0 15px', fontSize: '1.1em', fontWeight: 'bold' } }>
                 página {totalPages}
             </span>
 
             <button 
-                onClick={onNext} 
+                onClick={onNextPage} 
                 style={buttonStyle}
-                disabled={ isLoading || !hasNext }>Siguiente</button>
+                disabled={isLoading || !hasNext}>Siguiente</button>
             <div style={{ marginLeft: '20px' }}>
                 <label htmlFor="filterCategory">Filtrar por Categoría: </label>
                 <select id="filterCategory" onChange={(e) => onFilter(e.target.value)}>
                     <option value="all">Todas</option>
-                    {categories.map(cat => (
+                    {(categories || []).map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
                     ))}
                 </select>

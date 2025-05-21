@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import CharacterCard from './CharacterCard'; 
-import PaginationControls from './PaginationControls'; 
-import { set } from 'mongoose';
-
+import CharacterCard from './CharacterCard';
+import PaginationControls from './PaginationControls';
+import SearchBar from './searchBar'; // Asegúrate de tener este componente creado
 
 const API_URL = 'https://rickandmortyapi.com/api/character/';
 
-function RickAndMortyCharacters() { 
+function RickAndMortyCharacters() {
   const [characters, setCharacters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,102 +16,87 @@ function RickAndMortyCharacters() {
   const fetchCharacters = useCallback(async () => {
     setLoading(true);
     setError(null);
-    if (searchTerm) {
-      url = `${API_URL}?name=${searchTerm}`;
-    }
 
-    const url = `${API_URL}?page=${currentPage}`;
+    let url = `${API_URL}?page=${currentPage}`;
+    if (searchTerm) {
+      url += `&name=${searchTerm}`;
+    }
 
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        if (response.status === 404 && currentPage > (paginationInfo?.pages || 0)) { 
+        if (response.status === 404) {
           setCharacters([]);
-          setError('err message');
-          setPaginationInfo(prev => (null ));
+          setPaginationInfo(null);
           setLoading(false);
+          setError('No se encontraron personajes.');
           return;
         }
-        if (response.status === 404 && searchTerm) {
-          setCharacters([]);
-          setLoading(false);
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
       const data = await response.json();
       setCharacters(data.results || []);
       setPaginationInfo(data.info);
-
-    }
-    
-    catch (error) {
+    } catch (error) {
       console.error('Error al obtener personajes:', error);
       setError('No pudimos cargar los personajes. Intenta de nuevo más tarde.');
       setCharacters([]);
       setPaginationInfo(null);
-
     } finally {
       setLoading(false);
     }
-  }; 
-  
-  [currentPage]);
+  }, [currentPage, searchTerm]);
 
   useEffect(() => {
     fetchCharacters();
   }, [fetchCharacters]);
 
-  if (loading) {
-    return <p style={{ textAlign: 'center', fontSize: '1.5em', color: '#555' }}>Cargando personajes...</p>;
-  }
-
-  if (error) {
-    return <p style={{ textAlign: 'center', fontSize: '1.5em', color: 'red' }}>{error}</p>;
-  }
-
   const handleNextPage = () => {
-    if (paginationInfo && paginationInfo.next) {
-      setCharacters([]);
-      setCurrentPage((nextPage) => nextPage + 1);
+    if (paginationInfo?.next) {
+      setCurrentPage((prev) => prev + 1);
     }
-  }
-  const handlePreviousPage = () => {
-    if (paginationInfo && paginationInfo.prev) {
-      setCharacters([]);
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  }
-
-  const handleSearch = (newSearchTerm) => {
-    if (newSearchTerm !== searchTerm) {
-      setSearchTerm(newSearchTerm);
-      setCharacters([]);
   };
 
-  const handleSearch = (newSearchTerm ) => {
+  const handlePreviousPage = () => {
+    if (paginationInfo?.prev) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleSearch = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1);
+  };
 
   return (
-  <div style={appContainerStyle}>
-    <h1>Personajes de Rick y Morty</h1>
-    <searchBar onSearch={handleSearch} />
-    <div style={characterGridStyle}>
-      {characters.map((character) => (
-        <CharacterCard key={character.id} character={character} />
-      ))}
+    <div style={appContainerStyle}>
+      <h1>Personajes de Rick y Morty</h1>
+      <SearchBar onSearch={handleSearch} />
+      {loading ? (
+        <p style={{ textAlign: 'center', fontSize: '1.5em', color: '#555' }}>Cargando personajes...</p>
+      ) : error ? (
+        <p style={{ textAlign: 'center', fontSize: '1.5em', color: 'red' }}>{error}</p>
+      ) : (
+        <>
+          <div style={characterGridStyle}>
+            {characters.map((character) => (
+              <CharacterCard key={character.id} character={character} />
+            ))}
+          </div>
+          <PaginationControls
+            onPrevPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            currentPage={currentPage}
+            isLoading={loading}
+            hasPrev={currentPage > 1}
+            hasNext={!!paginationInfo?.next}
+          />
+        </>
+      )}
     </div>
-    {error && (
-      <PaginationControls
-        onPrevPage={handlePreviousPage}
-        onNextPage={handleNextPage}
-        currentPage={currentPage}
-        isLoading={loading}
-        hasPrev={currentPage > 1}
-        hasNext={paginationInfo?.next !== null}
-      />
-    )}
-  </div>
-);
-
+  );
+}
 
 // Estilos
 const appContainerStyle = {
@@ -133,8 +117,5 @@ const characterGridStyle = {
   gap: '15px',
   marginTop: '20px',
 };
-
-}
-
 
 export default RickAndMortyCharacters;
